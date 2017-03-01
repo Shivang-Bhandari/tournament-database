@@ -8,11 +8,11 @@
 
 CREATE TABLE playerData (
   ID serial primary key,
-  name text,
+  name text
 );
 
 CREATE TABLE matchData (
   matchID serial primary key,
   winnerID int references playerData(ID),
-  loserID int references playerData(ID),
+  loserID int references playerData(ID)
 );
