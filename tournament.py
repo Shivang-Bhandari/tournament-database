@@ -13,15 +13,26 @@ def connect():
 
 def deleteMatches():
     """Remove all the match records from the database."""
-
+    dbConnect = connect()
+    dbCursor = dbConnect.cursor()
+    dbCursor.execute("delete from matchData;")
+    dbConnect.commit()
+    dbConnect.close()
 
 def deletePlayers():
     """Remove all the player records from the database."""
-
+    dbConnect = connect()
+    dbCursor = dbConnect.cursor()
+    dbCursor.execute("delete from playerData;")
+    dbConnect.commit()
+    dbConnect.close()
 
 def countPlayers():
     """Returns the number of players currently registered."""
-
+    dbConnect = connect()
+    dbCursor = dbConnect.cursor()
+    results = dbCursor.fetchall(dbCursor.execute("select countt(*) form playerData;"))
+    return results[0][0]
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
@@ -32,6 +43,11 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
+    dbConnect = connect()
+    dbCursor = dbConnect.cursor()
+    dbCursor.execute("INSERT into playerData (name) values(%s)", (name,);)
+    dbConnect.commit()
+    dbConnect.close()
 
 
 def playerStandings():
@@ -47,7 +63,24 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    dbConnect = connect()
+    dbCursor = dcConnect.cursor()
+    query = """
+    create view playerStandingData as
+    select playerData.ID,playerData.name,
+        (select count(matchData.winnerID) from matchData where playerData.ID = matchData.winnderID) as winn,
+        (select count(matchData.matchID) from matchData where playerData.ID = matchData.winnerID OR playerData.ID = matchData.loserID) as games
+    from playerData
+    order by winn desc, games desc;
+    select * from playerStandingData;
 
+    """
+
+    dbCursor.execute(query)
+    results = dbCursor.fetchall()
+    dbConnect.close()
+
+    return results
 
 def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
@@ -56,7 +89,9 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-
+    dbConnect = connect()
+    dbCursor = dbConnect.cursor()
+    dbCursor.execute("INSERT into matchData (winnerID, loserID) values (%s, %s)" (winner,loser) )
 
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
@@ -73,3 +108,11 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    playerStandingDataset = playerStandings()
+    pear=[]
+
+    for i in range(0,len(a),2):
+        j=(playerStandingDataset[i][0],playerStandingDataset[i][1],playerStandingDataset[i+1][0],playerStandingDataset[i+1][1])
+        pear.append(j)
+
+    return pear
